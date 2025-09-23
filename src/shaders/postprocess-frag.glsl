@@ -2,6 +2,7 @@
 precision highp float;
 
 uniform sampler2D u_SceneTex;
+uniform sampler2D u_InkTex;
 uniform vec2 u_Resolution;
 uniform float u_Time;
 uniform vec4 u_Color1; // The color with which to render this instance of geometry.
@@ -265,8 +266,11 @@ vec3 heightToNormal(float h, float strength) {
 void main() {
     vec2 uv = v_UV;
 
-    // Sample scene color
-    vec3 sceneCol = texture(u_SceneTex, uv).rgb;
+    // Sample scene (with alpha) and ink background
+    vec4 sceneSample = texture(u_SceneTex, uv);
+    vec3 inkCol = texture(u_InkTex, uv).rgb;
+    // Composite: scene over ink using scene alpha
+    vec3 sceneCol = mix(inkCol, sceneSample.rgb, sceneSample.a);
 
     // Grain
     vec3 p = vec3(uv * u_Resolution / 20., 1.0);
@@ -285,42 +289,7 @@ void main() {
     lightIntensity = clamp(lightIntensity, 0.001, 0.999);
 
     sceneCol *= diffuseTerm;
-    // Ink Splashes
-
-    float pi = 3.14159265;
-    float time = u_Time * 0.001;
-
-    for (float k = 0.; k < u_SplashCount; k++) {
-        time += random1(k);
-        float seed = floor(time);
-        vec2 ps = uv * 2.0 - 1.0;
-        float layerNum = 10.;
-        float noiseScale = 1.;
-        float r = length(ps + vec2(random1fr(seed + k), random1fr(random1fr(seed + k))));
-        // float r = length(ps + vec2(random1fr(seed + k), random1fr(seed + k)));
-        
-        float v = 0.;
-        ps += vec2(999., 999.);
-        // float s1 = perlinNoise(p, 1, 1, 0.5, 2.0, uint(432));
-        for (float i = 0.; i < layerNum; ++i) {
-            ps *= 1.6;
-            float radius = (5.0 + u_SplashScaleVar * random1fr(seed));
-            float h = noiseScale*perlinNoise(vec3(ps.x, ps.y, 1.0), 1, 1, 0.5, 2.0, uint(23)) + r * radius;
-            if (h < 0.09) {
-                v += 1./layerNum; 
-            }
-        }
-
-        // animate v
-        float animate = mod(time, 1.);
-        animate = expImpulse(animate, 20., 1.);
-        v = mix(0., v, animate);
-        v = clamp(v, 0.0001, 0.9999);
-        // vec3 invColor = vec3(1. - u_Color1.x, 1. -  u_Color1.y, 1. - u_Color1.z);
-        vec3 subtractColor = vec3(v) - u_SplashColor.rgb;
-        subtractColor = clamp(subtractColor, 0.0001, 0.9999);
-        sceneCol = sceneCol - subtractColor;
-    }
+    // No droplet generation here; ink was precomputed and composited above
 
     
 

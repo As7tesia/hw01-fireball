@@ -103,9 +103,14 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/fireball-frag.glsl')),
   ]);
 
-  const post = new ShaderProgram([
+  const paper = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/postprocess-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/postprocess-frag.glsl')),
+  ]);
+
+  const ink = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/postprocess-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/ink-frag.glsl')),
   ]);
 
   // This function will be called every frame
@@ -129,10 +134,11 @@ function main() {
 
 
     const sceneDrawables = (prevShape === 1) ? [icosphere] : [cube];
-    renderer.renderWithPost(
+    renderer.renderInkScenePaper(
       camera,
       custom,
-      post,
+      ink,
+      paper,
       sceneDrawables as any,
       square,
       vec4.fromValues(palette.color1[0] / 255, palette.color1[1] / 255, palette.color1[2] / 255, 1),

@@ -40,6 +40,7 @@ class ShaderProgram {
   unifLayerNum: WebGLUniformLocation;
   unifSceneTex: WebGLUniformLocation;
   unifResolution: WebGLUniformLocation;
+  unifInkTex: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -68,6 +69,7 @@ class ShaderProgram {
     this.unifLayerNum   = gl.getUniformLocation(this.prog, "u_LayerNum");
     this.unifSceneTex   = gl.getUniformLocation(this.prog, "u_SceneTex");
     this.unifResolution = gl.getUniformLocation(this.prog, "u_Resolution");
+    this.unifInkTex     = gl.getUniformLocation(this.prog, "u_InkTex");
   }
 
   use() {
@@ -165,6 +167,13 @@ class ShaderProgram {
     this.use();
     if (this.unifResolution !== -1) {
       gl.uniform2f(this.unifResolution, width, height);
+    }
+  }
+
+  setInkTexture(texUnit: number) {
+    this.use();
+    if (this.unifInkTex !== -1) {
+      gl.uniform1i(this.unifInkTex, texUnit);
     }
   }
 
