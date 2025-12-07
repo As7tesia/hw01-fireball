@@ -20,7 +20,6 @@ Done by generating a height map from noise, making a fake normal map with with d
  ![Screenshot 1](./SC1.jpg)
  
  ![Screenshot 2](./SC2.jpg)
- 
 
 ## Credits
 Inspiration drawn from 
